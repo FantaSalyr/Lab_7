@@ -7,15 +7,20 @@ import androidx.compose.material.Scaffold
 import com.topic2.android.notes.ui.components.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.topic2.android.notes.R
 import com.topic2.android.notes.domain.model.NoteModel
+import com.topic2.android.notes.routing.Screen
+import com.topic2.android.notes.ui.components.AppDrawer
 import com.topic2.android.notes.ui.components.Note
 import com.topic2.android.notes.viewmodel.MainViewModel
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -25,14 +30,31 @@ fun NotesScreen(
     val notes: List<NoteModel> by viewModel
         .notesNotInTrash
         .observeAsState(listOf())
+    val coroutineScope = rememberCoroutineScope()
+    val scaffoldState = rememberScaffoldState()
 
     Scaffold(topBar = {
         TopAppBar(
             title = stringResource(id = R.string.notes),
             icon = Icons.Filled.List,
-            onIconClick = {}
+            onIconClick = {
+                coroutineScope.launch {
+                    scaffoldState.drawerState.open()
+                }
+            }
         )
     },
+        scaffoldState = scaffoldState,
+        drawerContent = {
+            AppDrawer(
+                currentScreen = Screen.Notes,
+                closeDrawerAction = {
+                    coroutineScope.launch {
+                        scaffoldState.drawerState.close()
+                    }
+                }
+            )
+        },
         content = {
             if (notes.isNotEmpty()) {
                 NotesList(
