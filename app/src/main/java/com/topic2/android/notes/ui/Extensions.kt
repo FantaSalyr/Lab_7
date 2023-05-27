@@ -1,4 +1,4 @@
-package com.topic2.android.notes.util
+package com.topic2.android.notes.ui
 
 import androidx.compose.ui.graphics.Color
 
