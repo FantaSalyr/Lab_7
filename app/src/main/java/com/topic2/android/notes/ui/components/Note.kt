@@ -15,6 +15,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.topic2.android.notes.R
+import com.topic2.android.notes.routing.Screen
+import com.topic2.android.notes.theme.NotesTheme
 import com.topic2.android.notes.theme.rwGreen
 
 @Composable
