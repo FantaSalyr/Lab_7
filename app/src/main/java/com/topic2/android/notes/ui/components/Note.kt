@@ -1,6 +1,7 @@
 package com.topic2.android.notes.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,12 +22,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.topic2.android.notes.R
+import com.topic2.android.notes.domain.model.NoteModel
 import com.topic2.android.notes.routing.Screen
 import com.topic2.android.notes.theme.NotesTheme
 import com.topic2.android.notes.theme.rwGreen
+import com.topic2.android.notes.ui.fromHex
 
 @Composable
-fun Note() {
+fun Note(
+    note: NoteModel,
+    onNoteClick: (NoteModel) -> Unit = {},
+    onNoteCheckedChange: (NoteModel) -> Unit = {},
+) {
     val backgroundShape: Shape = RoundedCornerShape(4.dp)
     Row(
         modifier = Modifier
@@ -35,13 +42,14 @@ fun Note() {
             .fillMaxWidth()
             .heightIn(min = 64.dp)
             .background(Color.White, backgroundShape)
+            .clickable(onClick = { onNoteClick(note) })
 
     ) {
         NoteColor(
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(start = 16.dp, end = 16.dp),
-            color = rwGreen ,
+            color = Color.fromHex(note.color.hex),
             size = 40.dp,
             border = 1.dp
         )
@@ -51,19 +59,22 @@ fun Note() {
                 .align(Alignment.CenterVertically)
         ) {
             Text(
-                text = stringResource(id = R.string.header),
+                text = note.title,
                 maxLines = 1
             )
             Text(
-                text = stringResource(id = R.string.content),
+                text = note.content,
                 maxLines = 1
             )
         }
+        if (note.isCheckedOff != null)
         Checkbox(
-            checked = false,
-            onCheckedChange = {},
+            checked = note.isCheckedOff,
+            onCheckedChange = { isChecked ->
+                val newNote = note.copy(isCheckedOff = isChecked)
+                onNoteCheckedChange(newNote)},
             modifier = Modifier
-                .padding(start = 8.dp)
+                .padding(start = 16.dp)
                 .align(Alignment.CenterVertically)
         )
     }
@@ -71,6 +82,13 @@ fun Note() {
 
 @Preview
 @Composable
-private fun NotePreview() { Note()
-
+private fun NotePreview() {
+    Note(
+        note = NoteModel(
+            1,
+            "Заметка 1",
+            "Содержание 1",
+            null
+        )
+    )
 }
