@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Notes</string>
+    <string name="header">Заголовок</string>
+    <string name="content">Содержимое</string>
 </resources>
