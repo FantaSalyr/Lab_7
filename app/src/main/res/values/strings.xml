@@ -9,4 +9,9 @@
     <string name="picked_color">Выбранный цвет</string>
     <string name="checked">Отметить заметку</string>
     <string name="body">Описание</string>
+    <string name="move">Переместить заметку в корзину?</string>
+    <string name="move_2">переместить заметку в корзину?</string>
+    <string name="sure">Вы уверены, что хотите</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="dismiss">Отменить</string>
 </resources>

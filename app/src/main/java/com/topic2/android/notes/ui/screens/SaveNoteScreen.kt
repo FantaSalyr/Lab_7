@@ -1,6 +1,7 @@
 package com.topic2.android.notes.ui.screens
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.BottomDrawer
+import androidx.compose.material.BottomDrawerState
+import androidx.compose.material.BottomDrawerValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -16,6 +21,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -35,8 +41,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.rememberBottomDrawerState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.res.painterResource
 import com.topic2.android.notes.domain.model.NEW_NOTE_ID
 import com.topic2.android.notes.domain.model.NoteModel
@@ -44,6 +55,7 @@ import com.topic2.android.notes.routing.NotesRouter
 import com.topic2.android.notes.routing.Screen
 import com.topic2.android.notes.ui.fromHex
 import com.topic2.android.notes.viewmodel.MainViewModel
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -51,6 +63,25 @@ import com.topic2.android.notes.viewmodel.MainViewModel
 fun SaveNoteScreen(viewModel: MainViewModel){
     val noteEntry: NoteModel by viewModel.noteEntry.observeAsState(NoteModel())
 
+    val colors: List<ColorModel> by viewModel.colors
+        .observeAsState(listOf())
+
+    val bottomDrawerState: BottomDrawerState = rememberBottomDrawerState(BottomDrawerValue.Closed)
+    val coroutineScope = rememberCoroutineScope()
+
+    val moveNoteToTrashDialogShownState = rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    BackHandler(
+        onBack = {
+            if(bottomDrawerState.isOpen){
+                coroutineScope.launch{ bottomDrawerState.close()}
+            } else{
+                NotesRouter.navigateTo(Screen.Notes)
+            }
+        }
+    )
     Scaffold(topBar = {
         val isEditingMode: Boolean = noteEntry.id != NEW_NOTE_ID
         SaveNoteTopAppBar(
@@ -58,18 +89,67 @@ fun SaveNoteScreen(viewModel: MainViewModel){
             onBackClick = {
                 NotesRouter.navigateTo(Screen.Notes)
             },
-            onSaveNoteClick = {viewModel.saveNote(noteEntry)},
-            onOpenColorPickerClick = {},
-            onDeleteNoteClick = {viewModel.moveNoteToTrash(noteEntry)}
+            onSaveNoteClick = {
+                viewModel.saveNote(noteEntry)
+            },
+            onOpenColorPickerClick = {
+                coroutineScope.launch{ bottomDrawerState.open() }
+            },
+            onDeleteNoteClick = {
+                moveNoteToTrashDialogShownState.value = true
+            }
         )
     },
         content = {
-                SaveNoteContent(
-                    note = noteEntry ,
-                    onNoteChange = { updateNoteEntry ->
-                        viewModel.onNoteEntryChange(updateNoteEntry)
+            BottomDrawer(
+                drawerState = bottomDrawerState,
+                drawerContent = {
+                    ColorPicker(
+                        color = colors,
+                        onColorSelect = { color ->
+                            val newNoteEntry = noteEntry.copy(color = color)
+                            viewModel.onNoteEntryChange(newNoteEntry)
+                        }
+                    )
+                },
+                content = {
+                    SaveNoteContent(
+                        note = noteEntry ,
+                        onNoteChange = { updateNoteEntry ->
+                            viewModel.onNoteEntryChange(updateNoteEntry)
+                        }
+                    )
+                },
+            )
+            if (moveNoteToTrashDialogShownState.value){
+                AlertDialog(
+                    onDismissRequest = {
+                        moveNoteToTrashDialogShownState.value = false
+                    },
+                    title = {
+                        Text(text = stringResource(id = R.string.move))
+                    },
+                    text = {
+                        Text(text = stringResource(id = R.string.sure) + " " +
+                                stringResource(id = R.string.move_2)
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.moveNoteToTrash(noteEntry)
+                        }) {
+                            Text(text = stringResource(id = R.string.confirm))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            moveNoteToTrashDialogShownState.value = false
+                        }) {
+                            Text(text = stringResource(id = R.string.dismiss))
+                        }
                     }
                 )
+            }
         }
     )
 }
