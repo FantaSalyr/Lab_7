@@ -12,6 +12,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -172,6 +173,27 @@ fun ColorItem(
 }
 
 @Composable
+private fun NoteCheckOption(
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        Modifier
+            .padding(8.dp)
+            .padding(top = 16.dp)
+    ) {
+        Text(
+            text = stringResource(id = R.string.checked), modifier = Modifier.weight(1f)
+        )
+        Switch(
+            checked = isChecked,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
+}
+
+@Composable
 private fun ColorPicker(
     color: List<ColorModel>,
     onColorSelect: (ColorModel) -> Unit
@@ -239,4 +261,10 @@ fun SaveNoteTopAppBarPreview(){
 @Composable
 fun PickedColorPreview(){
     PickedColor(ColorModel.DEFAULT)
+}
+
+@Preview(showBackground = true)
+@Composable
+fun NoteCheckOptionPreview(){
+    NoteCheckOption(false){}
 }
