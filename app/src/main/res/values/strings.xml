@@ -6,4 +6,5 @@
     <string name="on_dark_theme">Включить тёмную тему</string>
     <string name="basket">Корзина</string>
     <string name="save_note">Сохранение заметки</string>
+    <string name="picked_color">Выбранный цвет</string>
 </resources>
