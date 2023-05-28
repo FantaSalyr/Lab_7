@@ -8,4 +8,5 @@
     <string name="save_note">Сохранение заметки</string>
     <string name="picked_color">Выбранный цвет</string>
     <string name="checked">Отметить заметку</string>
+    <string name="body">Описание</string>
 </resources>
